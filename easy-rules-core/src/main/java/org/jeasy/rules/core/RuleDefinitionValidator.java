@@ -32,6 +32,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -131,8 +132,7 @@ class RuleDefinitionValidator {
         }
         if (notAnnotatedParameterCount == 1) {
             Parameter[] parameters = method.getParameters();
-            Parameter foundParameterOrFirst = getParameterOfTypeFacts(parameters);
-            return Facts.class.isAssignableFrom(foundParameterOrFirst.getType());
+            return findFirstParameterOfTypeFacts(parameters).isPresent();
         }
         return true;
     }
@@ -142,11 +142,10 @@ class RuleDefinitionValidator {
                 .anyMatch(annotation -> annotation.annotationType() != Fact.class);
     }
 
-    private Parameter getParameterOfTypeFacts(Parameter[] parameters) {
+    private Optional<Parameter> findFirstParameterOfTypeFacts(Parameter[] parameters) {
         return Arrays.stream(parameters)
                 .filter(parameter -> Facts.class.isAssignableFrom(parameter.getType()))
-                .findFirst()
-                .orElse(parameters[0]);
+                .findFirst();
     }
 
     private boolean isActionMethodWellDefined(final Method method) {
