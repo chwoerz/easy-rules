@@ -23,19 +23,18 @@
  */
 package org.jeasy.rules.core;
 
-import static java.lang.String.format;
+import org.jeasy.rules.annotation.*;
+import org.jeasy.rules.api.Facts;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.List;
-import org.jeasy.rules.annotation.Action;
-import org.jeasy.rules.annotation.Condition;
-import org.jeasy.rules.annotation.Fact;
-import org.jeasy.rules.annotation.Priority;
-import org.jeasy.rules.annotation.Rule;
-import org.jeasy.rules.api.Facts;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 /**
  * This component validates that an annotated rule object is well defined.
@@ -119,39 +118,35 @@ class RuleDefinitionValidator {
     private boolean validParameters(final Method method) {
         int notAnnotatedParameterCount = 0;
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        for(Annotation[] annotations : parameterAnnotations){
-            if(annotations.length == 0){
+        for (Annotation[] annotations : parameterAnnotations) {
+            if (annotations.length == 0) {
                 notAnnotatedParameterCount += 1;
-            } else {
-                //Annotation types has to be Fact
-                for(Annotation annotation : annotations){
-                    if(!annotation.annotationType().equals(Fact.class)){
-                        return false;
-                    }
+                if (notAnnotatedParameterCount > 1) {
+                    return false;
                 }
+            } else if (someAnnotationsAreNotFacts(annotations)) {
+                return false;
             }
-        }
-        if(notAnnotatedParameterCount > 1){
-            return false;
+
         }
         if (notAnnotatedParameterCount == 1) {
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            int index = getIndexOfParameterOfTypeFacts(method); // TODO use method.getParameters when moving to Java 8
-            return Facts.class.isAssignableFrom(parameterTypes[index]);
+            Parameter[] parameters = method.getParameters();
+            Parameter foundParameterOrFirst = getParameterOfTypeFacts(parameters);
+            return Facts.class.isAssignableFrom(foundParameterOrFirst.getType());
         }
         return true;
     }
 
-    private int getIndexOfParameterOfTypeFacts(Method method) {
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        int index = 0;
-        for (Class<?> parameterType : parameterTypes) {
-            if (Facts.class.isAssignableFrom(parameterType)) {
-                return index;
-            }
-            index++;
-        }
-        return 0;
+    private boolean someAnnotationsAreNotFacts(Annotation[] annotations) {
+        return Arrays.stream(annotations)
+                .anyMatch(annotation -> annotation.annotationType() != Fact.class);
+    }
+
+    private Parameter getParameterOfTypeFacts(Parameter[] parameters) {
+        return Arrays.stream(parameters)
+                .filter(parameter -> Facts.class.isAssignableFrom(parameter.getType()))
+                .findFirst()
+                .orElse(parameters[0]);
     }
 
     private boolean isActionMethodWellDefined(final Method method) {
@@ -167,14 +162,9 @@ class RuleDefinitionValidator {
     }
 
     private List<Method> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation, final Object rule) {
-        Method[] methods = getMethods(rule);
-        List<Method> annotatedMethods = new ArrayList<>();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(annotation)) {
-                annotatedMethods.add(method);
-            }
-        }
-        return annotatedMethods;
+        return Arrays.stream(getMethods(rule))
+                .filter(method -> method.isAnnotationPresent(annotation))
+                .collect(Collectors.toList());
     }
 
     private Method[] getMethods(final Object rule) {

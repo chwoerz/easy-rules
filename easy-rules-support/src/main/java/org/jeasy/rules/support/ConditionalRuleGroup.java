@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A conditional rule group is a composite rule where the rule with the highest priority acts as a condition:
@@ -87,16 +88,14 @@ public class ConditionalRuleGroup extends CompositeRule {
      */
     @Override
     public boolean evaluate(Facts facts) {
-        successfulEvaluations = new HashSet<>();
         conditionalRule = getRuleWithHighestPriority();
         if (conditionalRule.evaluate(facts)) {
-            for (Rule rule : rules) {
-                if (rule != conditionalRule && rule.evaluate(facts)) {
-                    successfulEvaluations.add(rule);
-                }
-            }
+            successfulEvaluations = rules.stream()
+                    .filter(rule -> rule != conditionalRule && rule.evaluate(facts))
+                    .collect(Collectors.toSet());
             return true;
         }
+        successfulEvaluations = new HashSet<>();
         return false;
     }
 

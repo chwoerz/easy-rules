@@ -1,31 +1,33 @@
 /**
  * The MIT License
- *
- *  Copyright (c) 2019, Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *  THE SOFTWARE.
+ * <p>
+ * Copyright (c) 2019, Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * <p>
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * <p>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package org.jeasy.rules.api;
 
 import org.jeasy.rules.core.RuleProxy;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class encapsulates a set of rules and represents a rules namespace.
@@ -51,7 +53,7 @@ public class Rules implements Iterable<Rule> {
      *
      * @param rules to register
      */
-    public Rules(Rule... rules ) {
+    public Rules(Rule... rules) {
         Collections.addAll(this.rules, rules);
     }
 
@@ -60,10 +62,8 @@ public class Rules implements Iterable<Rule> {
      *
      * @param rules to register
      */
-    public Rules(Object... rules ) {
-        for (Object rule : rules) {
-            this.register(RuleProxy.asRule(rule));
-        }
+    public Rules(Object... rules) {
+        Arrays.stream(rules).forEach(rule -> this.register(RuleProxy.asRule(rule)));
     }
 
     /**
@@ -91,12 +91,9 @@ public class Rules implements Iterable<Rule> {
      *
      * @param ruleName the name of the rule to unregister
      */
-    public void unregister(final String ruleName){
+    public void unregister(final String ruleName) {
         Objects.requireNonNull(ruleName);
-        Rule rule = findRuleByName(ruleName);
-        if(rule != null) {
-            unregister(rule);
-        }
+        findRuleByName(ruleName).ifPresent(this::unregister);
     }
 
     /**
@@ -120,11 +117,13 @@ public class Rules implements Iterable<Rule> {
         return rules.iterator();
     }
 
-    private Rule findRuleByName(String ruleName){
-        for(Rule rule : rules){
-            if(rule.getName().equalsIgnoreCase(ruleName))
-                return rule;
-        }
-        return null;
+    public Stream<Rule> asStream() {
+        return rules.stream();
+    }
+
+    private Optional<Rule> findRuleByName(String ruleName) {
+        return rules.stream()
+                .filter(rule -> rule.getName().equalsIgnoreCase(ruleName))
+                .findFirst();
     }
 }

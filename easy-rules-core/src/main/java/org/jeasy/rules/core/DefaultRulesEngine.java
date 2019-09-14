@@ -27,14 +27,15 @@ import org.jeasy.rules.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Default {@link RulesEngine} implementation.
- *
+ * <p>
  * This implementation handles a set of rules with unique name.
- *
+ * <p>
  * Rules are fired according to their natural order which is priority by default.
  *
  * @author Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
@@ -117,58 +118,38 @@ public final class DefaultRulesEngine extends AbstractRuleEngine {
 
     private Map<Rule, Boolean> doCheck(Rules rules, Facts facts) {
         LOGGER.debug("Checking rules");
-        Map<Rule, Boolean> result = new HashMap<>();
-        for (Rule rule : rules) {
-            if (shouldBeEvaluated(rule, facts)) {
-                result.put(rule, rule.evaluate(facts));
-            }
-        }
-        return result;
+        return rules.asStream()
+                .filter(rule -> shouldBeEvaluated(rule, facts))
+                .collect(Collectors.toMap(Function.identity(), rule -> rule.evaluate(facts)));
     }
 
     private void triggerListenersOnFailure(final Rule rule, final Exception exception, Facts facts) {
-        for (RuleListener ruleListener : ruleListeners) {
-            ruleListener.onFailure(rule, facts, exception);
-        }
+        ruleListeners.forEach(ruleListener -> ruleListener.onFailure(rule, facts, exception));
     }
 
     private void triggerListenersOnSuccess(final Rule rule, Facts facts) {
-        for (RuleListener ruleListener : ruleListeners) {
-            ruleListener.onSuccess(rule, facts);
-        }
+        ruleListeners.forEach(ruleListener -> ruleListener.onSuccess(rule, facts));
     }
 
     private void triggerListenersBeforeExecute(final Rule rule, Facts facts) {
-        for (RuleListener ruleListener : ruleListeners) {
-            ruleListener.beforeExecute(rule, facts);
-        }
+        ruleListeners.forEach(ruleListener -> ruleListener.beforeExecute(rule, facts));
     }
 
     private boolean triggerListenersBeforeEvaluate(Rule rule, Facts facts) {
-        for (RuleListener ruleListener : ruleListeners) {
-            if (!ruleListener.beforeEvaluate(rule, facts)) {
-                return false;
-            }
-        }
-        return true;
+        return ruleListeners.stream()
+                .allMatch(ruleListener -> ruleListener.beforeEvaluate(rule, facts));
     }
 
     private void triggerListenersAfterEvaluate(Rule rule, Facts facts, boolean evaluationResult) {
-        for (RuleListener ruleListener : ruleListeners) {
-            ruleListener.afterEvaluate(rule, facts, evaluationResult);
-        }
+        ruleListeners.forEach(ruleListener -> ruleListener.afterEvaluate(rule, facts, evaluationResult));
     }
 
     private void triggerListenersBeforeRules(Rules rule, Facts facts) {
-        for (RulesEngineListener rulesEngineListener : rulesEngineListeners) {
-            rulesEngineListener.beforeEvaluate(rule, facts);
-        }
+        rulesEngineListeners.forEach(rulesEngineListener -> rulesEngineListener.beforeEvaluate(rule, facts));
     }
 
     private void triggerListenersAfterRules(Rules rule, Facts facts) {
-        for (RulesEngineListener rulesEngineListener : rulesEngineListeners) {
-            rulesEngineListener.afterExecute(rule, facts);
-        }
+        rulesEngineListeners.forEach(rulesEngineListener -> rulesEngineListener.afterExecute(rule, facts));
     }
 
     private boolean shouldBeEvaluated(Rule rule, Facts facts) {

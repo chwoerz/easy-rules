@@ -33,23 +33,21 @@ public class UtilsTest {
 
     @Test
     public void findAnnotationWithClassWhereAnnotationIsPresent() {
-        Annotation foo = Utils.findAnnotation(Foo.class, AnnotationIsPresent.class);
+        Annotation foo = Utils.findAnnotation(Foo.class, AnnotationIsPresent.class).get();
 
         assertCorrectAnnotationIsFound(Foo.class, foo);
     }
 
     @Test
     public void findAnnotationWithClassWhereAnnotationIsPresentViaMetaAnnotation() {
-        Annotation foo = Utils.findAnnotation(Foo.class, AnnotationIsPresentViaMetaAnnotation.class);
+        Annotation foo = Utils.findAnnotation(Foo.class, AnnotationIsPresentViaMetaAnnotation.class).get();
 
         assertCorrectAnnotationIsFound(Foo.class, foo);
     }
 
     @Test
     public void findAnnotationWithClassWhereAnnotationIsNotPresent() {
-        Annotation foo = Utils.findAnnotation(Foo.class, Object.class);
-
-        assertNull(foo);
+        assertFalse(Utils.findAnnotation(Foo.class, Object.class).isPresent());
     }
 
     @Test

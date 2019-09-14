@@ -26,9 +26,10 @@ package org.jeasy.rules.support;
 import org.jeasy.rules.api.Rule;
 
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Base class for {@link RuleDefinitionReader}s.
@@ -38,12 +39,10 @@ import java.util.Map;
 public abstract class AbstractRuleDefinitionReader implements RuleDefinitionReader {
 
     public List<RuleDefinition> read(Reader reader) throws Exception {
-        List<RuleDefinition> ruleDefinitions = new ArrayList<>();
         Iterable<Map<String, Object>> rules = loadRules(reader);
-        for (Map<String, Object> rule : rules) {
-            ruleDefinitions.add(createRuleDefinition(rule));
-        }
-        return ruleDefinitions;
+        return StreamSupport.stream(rules.spliterator(), false)
+                .map(this::createRuleDefinition)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -93,11 +92,9 @@ public abstract class AbstractRuleDefinitionReader implements RuleDefinitionRead
         } else if ((composingRules == null || composingRules.isEmpty()) && compositeRuleType != null) {
             throw new IllegalArgumentException("Composite rules must have composing rules specified");
         } else if (composingRules != null) {
-            List<RuleDefinition> composingRuleDefinitions = new ArrayList<>();
-            for (Object rule : composingRules){
-                Map<String, Object> composingRuleMap = (Map<String, Object>) rule;
-                composingRuleDefinitions.add(createRuleDefinition(composingRuleMap));
-            }
+            List<RuleDefinition> composingRuleDefinitions = composingRules.stream()
+                    .map(rule -> createRuleDefinition((Map<String, Object>) rule))
+                    .collect(Collectors.toList());
             ruleDefinition.setComposingRules(composingRuleDefinitions);
             ruleDefinition.setCompositeRuleType(compositeRuleType);
         }

@@ -99,9 +99,7 @@ public class MVELRuleFactory extends AbstractRuleFactory<ParserContext> {
     public Rules createRules(Reader rulesDescriptor, ParserContext parserContext) throws Exception {
         Rules rules = new Rules();
         List<RuleDefinition> ruleDefinitions = reader.read(rulesDescriptor);
-        for (RuleDefinition ruleDefinition : ruleDefinitions) {
-            rules.register(createRule(ruleDefinition, parserContext));
-        }
+        ruleDefinitions.forEach(ruleDefinition -> rules.register(createRule(ruleDefinition, parserContext)));
         return rules;
     }
 
@@ -111,9 +109,7 @@ public class MVELRuleFactory extends AbstractRuleFactory<ParserContext> {
                 .description(ruleDefinition.getDescription())
                 .priority(ruleDefinition.getPriority())
                 .when(ruleDefinition.getCondition(), parserContext);
-        for (String action : ruleDefinition.getActions()) {
-            mvelRule.then(action, parserContext);
-        }
+        ruleDefinition.getActions().forEach(action -> mvelRule.then(action, parserContext));
         return mvelRule;
     }
 

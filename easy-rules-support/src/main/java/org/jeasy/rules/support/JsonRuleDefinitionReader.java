@@ -25,10 +25,11 @@ package org.jeasy.rules.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Rule definition reader based on <a href="https://github.com/FasterXML/jackson">Jackson</a>.
@@ -63,13 +64,11 @@ public class JsonRuleDefinitionReader extends AbstractRuleDefinitionReader {
     }
 
     @Override
-    protected Iterable<Map<String, Object>> loadRules(Reader reader) throws Exception {
-        List<Map<String, Object>> rulesList = new ArrayList<>();
+    protected Iterable<Map<String, Object>> loadRules(Reader reader) throws IOException {
         Object[] rules = objectMapper.readValue(reader, Object[].class);
-        for (Object rule : rules) {
-            rulesList.add((Map<String, Object>) rule);
-        }
-        return rulesList;
+        return Arrays.stream(rules)
+                .map(rule -> (Map<String, Object>) rule)
+                .collect(Collectors.toList());
     }
 
 }

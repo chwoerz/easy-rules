@@ -26,6 +26,7 @@ package org.jeasy.rules.support;
 import org.jeasy.rules.api.Facts;
 import org.jeasy.rules.api.Rule;
 
+import java.util.Optional;
 import java.util.TreeSet;
 
 /**
@@ -80,13 +81,11 @@ public class ActivationRuleGroup extends CompositeRule {
 
     @Override
     public boolean evaluate(Facts facts) {
-        for (Rule rule : rules) {
-            if (rule.evaluate(facts)) {
-                selectedRule = rule;
-                return true;
-            }
-        }
-        return false;
+        Optional<Rule> applicableRule = rules.stream()
+                .filter(rule -> rule.evaluate(facts))
+                .findFirst();
+        applicableRule.ifPresent(rule -> selectedRule = rule);
+        return applicableRule.isPresent();
     }
 
     @Override

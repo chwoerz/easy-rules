@@ -34,12 +34,12 @@ public class FactsTest {
     private Facts facts = new Facts();
 
     @Test
-    public void factsMustHaveUniqueName() throws Exception {
+    public void factsMustHaveUniqueName() {
         facts.put("foo", 1);
         facts.put("foo", 2);
 
         assertThat(facts).hasSize(1);
-        assertThat(facts.get("foo")).isEqualTo(2);
+        assertThat((int)facts.get("foo")).isEqualTo(2);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class FactsTest {
     }
 
     @Test
-    public void remove() throws Exception {
+    public void remove() {
         facts.put("foo", 1);
         facts.remove("foo");
 
@@ -70,9 +70,9 @@ public class FactsTest {
     }
 
     @Test
-    public void get() throws Exception {
+    public void get() {
         facts.put("foo", 1);
-        assertThat(facts.get("foo")).isEqualTo(1);
+        assertThat((int)facts.get("foo")).isEqualTo(1);
     }
 
     @Test

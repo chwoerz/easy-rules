@@ -26,9 +26,9 @@ package org.jeasy.rules.support;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Rule definition reader based on <a href="https://github.com/FasterXML/jackson-dataformats-text/tree/master/yaml">Jackson Yaml</a>.
@@ -66,11 +66,9 @@ public class YamlRuleDefinitionReader extends AbstractRuleDefinitionReader {
 
     @Override
     protected Iterable<Map<String, Object>> loadRules(Reader reader) {
-        List<Map<String, Object>> rulesList = new ArrayList<>();
         Iterable<Object> rules = yaml.loadAll(reader);
-        for (Object rule : rules) {
-            rulesList.add((Map<String, Object>) rule);
-        }
-        return rulesList;
+        return StreamSupport.stream(rules.spliterator(), false)
+                .map(rule -> (Map<String, Object>) rule)
+                .collect(Collectors.toList());
     }
 }

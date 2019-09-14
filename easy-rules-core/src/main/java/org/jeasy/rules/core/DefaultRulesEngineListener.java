@@ -24,13 +24,10 @@
 package org.jeasy.rules.core;
 
 import org.jeasy.rules.api.Facts;
-import org.jeasy.rules.api.Rule;
 import org.jeasy.rules.api.Rules;
 import org.jeasy.rules.api.RulesEngineListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 class DefaultRulesEngineListener implements RulesEngineListener {
 
@@ -65,17 +62,12 @@ class DefaultRulesEngineListener implements RulesEngineListener {
 
     private void log(Rules rules) {
         LOGGER.debug("Registered rules:");
-        for (Rule rule : rules) {
-            LOGGER.debug("Rule { name = '{}', description = '{}', priority = '{}'}",
-                    rule.getName(), rule.getDescription(), rule.getPriority());
-        }
+        rules.forEach(rule -> LOGGER.debug("Rule { name = '{}', description = '{}', priority = '{}'}",
+                rule.getName(), rule.getDescription(), rule.getPriority()));
     }
 
     private void log(Facts facts) {
         LOGGER.debug("Known facts:");
-        for (Map.Entry<String, Object> fact : facts) {
-            LOGGER.debug("Fact { {} : {} }",
-                    fact.getKey(), String.valueOf(fact.getValue()));
-        }
+        facts.forEach(fact -> LOGGER.debug("Fact { {} : {} }", fact.getKey(), fact.getValue()));
     }
 }

@@ -24,6 +24,7 @@
 package org.jeasy.rules.api;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -95,16 +96,8 @@ public class Facts implements Iterable<Map.Entry<String, Object>> {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("[");
-        List<Map.Entry<String, Object>> entries = new ArrayList<>(facts.entrySet());
-        for (int i = 0; i < entries.size(); i++) {
-            Map.Entry<String, Object> entry = entries.get(i);
-            stringBuilder.append(format(" { %s : %s } ", entry.getKey(), String.valueOf(entry.getValue())));
-            if (i < entries.size() - 1) {
-                stringBuilder.append(",");
-            }
-        }
-        stringBuilder.append("]");
-        return  stringBuilder.toString();
+        return facts.entrySet().stream()
+                .map(entry -> format(" { %s : %s } ", entry.getKey(), String.valueOf(entry.getValue())))
+                .collect(Collectors.joining(",", "[", "]"));
     }
 }

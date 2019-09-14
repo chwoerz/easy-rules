@@ -28,10 +28,7 @@ import org.jeasy.rules.api.Rule;
 import org.jeasy.rules.core.BasicRule;
 import org.jeasy.rules.core.RuleProxy;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Base class representing a composite rule composed of a set of rules.
@@ -107,10 +104,7 @@ public abstract class CompositeRule extends BasicRule {
      * @param rule the rule to remove
      */
     public void removeRule(final Object rule) {
-        Rule proxy = proxyRules.get(rule);
-        if (proxy != null) {
-            rules.remove(proxy);
-        }
+        Optional.ofNullable(proxyRules.get(rule)).ifPresent(rules::remove);
     }
 
 }

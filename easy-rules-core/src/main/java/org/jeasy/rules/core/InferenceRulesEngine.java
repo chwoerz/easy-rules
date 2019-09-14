@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Inference {@link RulesEngine} implementation.
@@ -67,7 +68,7 @@ public final class InferenceRulesEngine extends AbstractRuleEngine {
         do {
             LOGGER.debug("Selecting candidate rules based on the following facts: {}", facts);
             selectedRules = selectCandidates(rules, facts);
-            if(!selectedRules.isEmpty()) {
+            if (!selectedRules.isEmpty()) {
                 delegate.doFire(new Rules(selectedRules), facts);
             } else {
                 LOGGER.debug("No candidate rules found for facts: {}", facts);
@@ -76,13 +77,9 @@ public final class InferenceRulesEngine extends AbstractRuleEngine {
     }
 
     private Set<Rule> selectCandidates(Rules rules, Facts facts) {
-        Set<Rule> candidates = new TreeSet<>();
-        for (Rule rule : rules) {
-            if (rule.evaluate(facts)) {
-                candidates.add(rule);
-            }
-        }
-        return candidates;
+        return rules.asStream()
+                .filter(rule -> rule.evaluate(facts))
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     @Override

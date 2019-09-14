@@ -38,6 +38,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -65,17 +66,15 @@ public class RuleProxy implements InvocationHandler {
      * @return a proxy that implements the {@link Rule} interface.
      */
     public static Rule asRule(final Object rule) {
-        Rule result;
         if (rule instanceof Rule) {
-            result = (Rule) rule;
+            return (Rule) rule;
         } else {
             ruleDefinitionValidator.validateRuleDefinition(rule);
-            result = (Rule) Proxy.newProxyInstance(
+            return (Rule) Proxy.newProxyInstance(
                     Rule.class.getClassLoader(),
                     new Class[]{Rule.class, Comparable.class},
                     new RuleProxy(rule));
         }
-        return result;
     }
 
     @Override
@@ -107,7 +106,7 @@ public class RuleProxy implements InvocationHandler {
 
     private Object evaluateMethod(final Object[] args) throws IllegalAccessException, InvocationTargetException {
         Facts facts = (Facts) args[0];
-        Method conditionMethod = getConditionMethod();
+        Method conditionMethod = getConditionMethod().orElse(null);
         try {
             List<Object> actualParameters = getActualParameters(conditionMethod, facts);
             return conditionMethod.invoke(target, actualParameters.toArray()); // validated upfront
@@ -130,15 +129,17 @@ public class RuleProxy implements InvocationHandler {
         }
         return null;
     }
-    private Object compareToMethod(final Object[] args) throws Exception {
-        Method compareToMethod = getCompareToMethod();
-        if (compareToMethod != null) {
-            return compareToMethod.invoke(target, args);
+
+    private Object compareToMethod(final Object[] args) throws InvocationTargetException, IllegalAccessException {
+        Optional<Method> compareToMethod = getCompareToMethod();
+        if (compareToMethod.isPresent()) {
+            return compareToMethod.get().invoke(target, args);
         } else {
             Rule otherRule = (Rule) args[0];
             return compareTo(otherRule);
         }
     }
+
     private List<Object> getActualParameters(Method method, Facts facts) {
         List<Object> actualParameters = new ArrayList<>();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
@@ -173,12 +174,12 @@ public class RuleProxy implements InvocationHandler {
             return false;
         }
         String otherDescription = otherRule.getDescription();
-        String description =  getRuleDescription();
-        return !(description != null ? !description.equals(otherDescription) : otherDescription != null);
+        String description = getRuleDescription();
+        return Objects.equals(description, otherDescription);
     }
 
-    private int hashCodeMethod() throws Exception {
-        int result   = getRuleName().hashCode();
+    private int hashCodeMethod() throws InvocationTargetException, IllegalAccessException {
+        int result = getRuleName().hashCode();
         int priority = getRulePriority();
         String description = getRuleDescription();
         result = 31 * result + (description != null ? description.hashCode() : 0);
@@ -193,10 +194,10 @@ public class RuleProxy implements InvocationHandler {
                 return (String) method.invoke(target);
             }
         }
-       return getRuleName();
+        return getRuleName();
     }
 
-    private int compareTo(final Rule otherRule) throws Exception {
+    private int compareTo(final Rule otherRule) throws InvocationTargetException, IllegalAccessException {
         int otherPriority = otherRule.getPriority();
         int priority = getRulePriority();
         if (priority < otherPriority) {
@@ -210,7 +211,7 @@ public class RuleProxy implements InvocationHandler {
         }
     }
 
-    private int getRulePriority() throws Exception {
+    private int getRulePriority() throws InvocationTargetException, IllegalAccessException {
         int priority = Rule.DEFAULT_PRIORITY;
 
         org.jeasy.rules.annotation.Rule rule = getRuleAnnotation();
@@ -228,37 +229,23 @@ public class RuleProxy implements InvocationHandler {
         return priority;
     }
 
-    private Method getConditionMethod() {
-        Method[] methods = getMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(Condition.class)) {
-                return method;
-            }
-        }
-        return null;
+    private Optional<Method> getConditionMethod() {
+        return Arrays.stream(getMethods())
+                .filter(method -> method.isAnnotationPresent(Condition.class))
+                .findFirst();
     }
 
     private Set<ActionMethodOrderBean> getActionMethodBeans() {
-        Method[] methods = getMethods();
-        Set<ActionMethodOrderBean> actionMethodBeans = new TreeSet<>();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(Action.class)) {
-                Action actionAnnotation = method.getAnnotation(Action.class);
-                int order = actionAnnotation.order();
-                actionMethodBeans.add(new ActionMethodOrderBean(method, order));
-            }
-        }
-        return actionMethodBeans;
+        return Arrays.stream(getMethods())
+                .filter(method -> method.isAnnotationPresent(Action.class))
+                .map(method -> new ActionMethodOrderBean(method, method.getAnnotation(Action.class).order()))
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private Method getCompareToMethod() {
-        Method[] methods = getMethods();
-        for (Method method : methods) {
-            if (method.getName().equals("compareTo")) {
-                return method;
-            }
-        }
-        return null;
+    private Optional<Method> getCompareToMethod() {
+        return Arrays.stream(getMethods())
+                .filter(method -> Objects.equals(method.getName(), "compareTo"))
+                .findFirst();
     }
 
     private Method[] getMethods() {
@@ -266,7 +253,7 @@ public class RuleProxy implements InvocationHandler {
     }
 
     private org.jeasy.rules.annotation.Rule getRuleAnnotation() {
-        return Utils.findAnnotation(org.jeasy.rules.annotation.Rule.class, getTargetClass());
+        return Utils.findAnnotation(org.jeasy.rules.annotation.Rule.class, getTargetClass()).orElse(null);
     }
 
     private String getRuleName() {
@@ -285,22 +272,18 @@ public class RuleProxy implements InvocationHandler {
     }
 
     private void appendConditionMethodName(StringBuilder description) {
-        Method method = getConditionMethod();
-        if (method != null) {
+        getConditionMethod().ifPresent(method -> {
             description.append("when ");
             description.append(method.getName());
             description.append(" then ");
-        }
+        });
     }
 
     private void appendActionMethodsNames(StringBuilder description) {
-        Iterator<ActionMethodOrderBean> iterator = getActionMethodBeans().iterator();
-        while (iterator.hasNext()) {
-            description.append(iterator.next().getMethod().getName());
-            if (iterator.hasNext()) {
-                description.append(",");
-            }
-        }
+        String methodNames = getActionMethodBeans().stream()
+                .map(methodBean -> methodBean.getMethod().getName())
+                .collect(Collectors.joining(","));
+        description.append(methodNames);
     }
 
     private Class<?> getTargetClass() {
