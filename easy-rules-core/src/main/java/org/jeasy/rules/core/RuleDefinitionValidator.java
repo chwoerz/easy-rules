@@ -118,23 +118,22 @@ class RuleDefinitionValidator {
 
     private boolean validParameters(final Method method) {
         int notAnnotatedParameterCount = 0;
-        
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for(Annotation[] annotations : parameterAnnotations){
             if(annotations.length == 0){
-                if(notAnnotatedParameterCount == 1){
-                  return false;
-                }
                 notAnnotatedParameterCount += 1;
-            } 
-            //Annotation types has to be Fact
-            for(Annotation annotation : annotations){
-                if(!annotation.annotationType().equals(Fact.class)){
-                    return false;
+            } else {
+                //Annotation types has to be Fact
+                for(Annotation annotation : annotations){
+                    if(!annotation.annotationType().equals(Fact.class)){
+                        return false;
+                    }
                 }
             }
         }
-        
+        if(notAnnotatedParameterCount > 1){
+            return false;
+        }
         if (notAnnotatedParameterCount == 1) {
             Class<?>[] parameterTypes = method.getParameterTypes();
             int index = getIndexOfParameterOfTypeFacts(method); // TODO use method.getParameters when moving to Java 8
@@ -145,11 +144,12 @@ class RuleDefinitionValidator {
 
     private int getIndexOfParameterOfTypeFacts(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
-        for (int i = 0; i < parameterTypes.length; i++) {
-            Class<?> parameterType = parameterTypes[i];
+        int index = 0;
+        for (Class<?> parameterType : parameterTypes) {
             if (Facts.class.isAssignableFrom(parameterType)) {
-                return i;
-            } 
+                return index;
+            }
+            index++;
         }
         return 0;
     }
