@@ -57,7 +57,7 @@ public class RulesEngineListenerTest extends AbstractTest {
         inOrder.verify(rulesEngineListener1).beforeEvaluate(rules, facts);
         inOrder.verify(rulesEngineListener2).beforeEvaluate(rules, facts);
         inOrder.verify(rule1).evaluate(facts);
-        inOrder.verify(rule1).execute(facts);
+        inOrder.verify(rule1).accept(facts);
         inOrder.verify(rulesEngineListener1).afterExecute(rules, facts);
         inOrder.verify(rulesEngineListener2).afterExecute(rules, facts);
     }

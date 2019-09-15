@@ -23,7 +23,6 @@
  */
 package org.jeasy.rules.mvel;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Condition;
 import org.jeasy.rules.api.Facts;
 import org.jeasy.rules.api.Rule;
@@ -32,6 +31,7 @@ import org.mvel2.ParserContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A {@link org.jeasy.rules.api.Rule} implementation that uses <a href="https://github.com/mvel/mvel">MVEL</a> to evaluate and execute the rule.
@@ -41,7 +41,7 @@ import java.util.List;
 public class MVELRule extends BasicRule {
 
     private Condition condition = Condition.FALSE;
-    private List<Action> actions = new ArrayList<>();
+    private List<Consumer<Facts>> actions = new ArrayList<>();
 
     /**
      * Create a new MVEL rule.
@@ -129,9 +129,7 @@ public class MVELRule extends BasicRule {
     }
 
     @Override
-    public void execute(Facts facts) throws Exception {
-        for (Action action : actions) {
-            action.execute(facts);
-        }
+    public void accept(Facts facts) {
+        actions.forEach(action -> action.accept(facts));
     }
 }

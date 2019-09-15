@@ -62,7 +62,7 @@ public class SpELRuleTest {
         facts.put("person", foo);
 
         // when
-        spelRule.execute(facts);
+        spelRule.accept(facts);
 
         // then
         assertThat(foo.isAdult()).isTrue();
@@ -78,7 +78,7 @@ public class SpELRuleTest {
                 .then("#root['person'].setAdult(true)");
 
         // when
-        spelRule.execute(facts);
+        spelRule.accept(facts);
 
         // then
         assertThat(foo.isAdult()).isTrue();

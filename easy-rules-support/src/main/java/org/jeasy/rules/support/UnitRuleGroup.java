@@ -76,9 +76,9 @@ public class UnitRuleGroup extends CompositeRule {
     }
 
     @Override
-    public void execute(Facts facts) throws Exception {
+    public void accept(Facts facts) {
         for (Rule rule : rules) {
-            rule.execute(facts);
+            rule.accept(facts);
         }
     }
 }

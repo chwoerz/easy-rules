@@ -23,12 +23,13 @@
  */
 package org.jeasy.rules.core;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Condition;
+import org.jeasy.rules.api.Facts;
 import org.jeasy.rules.api.Rule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Builder to create {@link Rule} instances.
@@ -42,7 +43,7 @@ public class RuleBuilder {
     private int priority = Rule.DEFAULT_PRIORITY;
 
     private Condition condition = Condition.FALSE;
-    private List<Action> actions = new ArrayList<>();
+    private List<Consumer<Facts>> actions = new ArrayList<>();
 
     /**
      * Set rule name.
@@ -94,7 +95,7 @@ public class RuleBuilder {
      * @param action to add
      * @return the builder instance
      */
-    public RuleBuilder then(Action action) {
+    public RuleBuilder then(Consumer<Facts> action) {
         this.actions.add(action);
         return this;
     }

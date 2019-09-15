@@ -77,7 +77,7 @@ public class DefaultRulesEngineTest extends AbstractTest {
         rulesEngine.fire(rules, facts);
 
         // Then
-        verify(rule1).execute(facts);
+        verify(rule1).accept(facts);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class DefaultRulesEngineTest extends AbstractTest {
         rulesEngine.fire(rules, facts);
 
         // Then
-        verify(rule1, never()).execute(facts);
+        verify(rule1, never()).accept(facts);
     }
 
     @Test
@@ -107,8 +107,8 @@ public class DefaultRulesEngineTest extends AbstractTest {
 
         // Then
         InOrder inOrder = inOrder(rule1, rule2);
-        inOrder.verify(rule1).execute(facts);
-        inOrder.verify(rule2).execute(facts);
+        inOrder.verify(rule1).accept(facts);
+        inOrder.verify(rule2).accept(facts);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class DefaultRulesEngineTest extends AbstractTest {
         rulesEngine.fire(rules, facts);
 
         // Then
-        verify(rule1).execute(facts);
+        verify(rule1).accept(facts);
         assertThat(annotatedRule.isExecuted()).isTrue();
     }
 
@@ -309,17 +309,17 @@ public class DefaultRulesEngineTest extends AbstractTest {
         }
 
         @Action
-        public void then0() throws Exception {
+        public void then0() {
             actionSequence += "0";
         }
 
         @Action(order = 1)
-        public void then1() throws Exception {
+        public void then1() {
             actionSequence += "1";
         }
 
         @Action(order = 2)
-        public void then2() throws Exception {
+        public void then2() {
             actionSequence += "2";
             executed = true;
         }

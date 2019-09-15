@@ -328,7 +328,7 @@ public class ConditionalRuleGroupTest {
         }
 
         @Override
-        public void execute(Facts facts) {
+        public void accept(Facts facts) {
             this.executed = true;
             actions.add(name);
         }

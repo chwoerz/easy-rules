@@ -64,8 +64,8 @@ public class CustomRuleOrderingTest extends AbstractTest {
          * But in this case, the compareTo method order rules by their name, so rule1 should be executed first ("a" < "b")
          */
         InOrder inOrder = inOrder(rule1, rule2);
-        inOrder.verify(rule1).execute(facts);
-        inOrder.verify(rule2).execute(facts);
+        inOrder.verify(rule1).accept(facts);
+        inOrder.verify(rule2).accept(facts);
 
     }
 

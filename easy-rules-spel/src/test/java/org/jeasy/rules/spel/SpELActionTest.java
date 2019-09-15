@@ -23,7 +23,6 @@
  */
 package org.jeasy.rules.spel;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Facts;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,6 +30,8 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.ExpectedException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateParserContext;
+
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,13 +46,13 @@ public class SpELActionTest {
     @Test
     public void testSpELActionExecution() throws Exception {
         // given
-        Action markAsAdult = new SpELAction("#person.setAdult(true)");
+        Consumer<Facts> markAsAdult = new SpELAction("#person.setAdult(true)");
         Facts facts = new Facts();
         Person foo = new Person("foo", 20);
         facts.put("person", foo);
 
         // when
-        markAsAdult.execute(facts);
+        markAsAdult.accept(facts);
 
         // then
         assertThat(foo.isAdult()).isTrue();
@@ -60,11 +61,11 @@ public class SpELActionTest {
     @Test
     public void testSpELFunctionExecution() throws Exception {
         // given
-        Action printAction = new SpELAction("T(org.jeasy.rules.spel.Person).sayHello()");
+        Consumer<Facts> printAction = new SpELAction("T(org.jeasy.rules.spel.Person).sayHello()");
         Facts facts = new Facts();
 
         // when
-        printAction.execute(facts);
+        printAction.accept(facts);
 
         // then
         assertThat(systemOutRule.getLog()).contains("hello");
@@ -75,13 +76,13 @@ public class SpELActionTest {
         // given
         expectedException.expect(Exception.class);
         expectedException.expectMessage("EL1004E: Method call: Method setBlah(java.lang.Boolean) cannot be found on type org.jeasy.rules.spel.Person");
-        Action action = new SpELAction("#person.setBlah(true)");
+        Consumer<Facts> action = new SpELAction("#person.setBlah(true)");
         Facts facts = new Facts();
         Person foo = new Person("foo", 20);
         facts.put("person", foo);
 
         // when
-        action.execute(facts);
+        action.accept(facts);
 
         // then
         // excepted exception
@@ -91,11 +92,11 @@ public class SpELActionTest {
     public void testMVELActionWithExpressionAndParserContext() throws Exception {
         // given
         ParserContext context = new TemplateParserContext();
-        Action printAction = new SpELAction("#{ T(org.jeasy.rules.spel.Person).sayHello() }", context);
+        Consumer<Facts> printAction = new SpELAction("#{ T(org.jeasy.rules.spel.Person).sayHello() }", context);
         Facts facts = new Facts();
 
         // when
-        printAction.execute(facts);
+        printAction.accept(facts);
 
         // then
         assertThat(systemOutRule.getLog()).contains("hello");

@@ -23,13 +23,15 @@
  */
 package org.jeasy.rules.core;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Condition;
+import org.jeasy.rules.api.Facts;
 import org.jeasy.rules.api.Rule;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+
+import java.util.function.Consumer;
 
 import static org.mockito.Mockito.*;
 
@@ -38,7 +40,7 @@ public class DefaultRuleTest extends AbstractTest {
     @Mock
     private Condition condition;
     @Mock
-    private Action action1, action2;
+    private Consumer<Facts> action1, action2;
 
     @Test
     public void WhenConditionIsTrue_ThenActionsShouldBeExecutedInOrder() throws Exception {
@@ -56,8 +58,8 @@ public class DefaultRuleTest extends AbstractTest {
 
         // then
         InOrder inOrder = Mockito.inOrder(action1, action2);
-        inOrder.verify(action1).execute(facts);
-        inOrder.verify(action2).execute(facts);
+        inOrder.verify(action1).accept(facts);
+        inOrder.verify(action2).accept(facts);
     }
 
     @Test
@@ -75,7 +77,7 @@ public class DefaultRuleTest extends AbstractTest {
         rulesEngine.fire(rules, facts);
 
         // then
-        verify(action1, never()).execute(facts);
-        verify(action2, never()).execute(facts);
+        verify(action1, never()).accept(facts);
+        verify(action2, never()).accept(facts);
     }
 }

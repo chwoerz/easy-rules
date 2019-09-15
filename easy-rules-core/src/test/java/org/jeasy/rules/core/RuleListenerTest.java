@@ -63,11 +63,11 @@ public class RuleListenerTest extends AbstractTest {
     }
 
     @Test
-    public void whenTheRuleFails_thenOnFailureShouldBeExecuted() throws Exception {
+    public void whenTheRuleFails_thenOnFailureShouldBeExecuted() {
         // Given
         when(rule1.evaluate(facts)).thenReturn(true);
-        final Exception exception = new Exception("fatal error!");
-        doThrow(exception).when(rule1).execute(facts);
+        final RuntimeException exception = new RuntimeException("fatal error!");
+        doThrow(exception).when(rule1).accept(facts);
         rules.register(rule1);
 
         // When

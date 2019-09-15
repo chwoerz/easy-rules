@@ -23,6 +23,8 @@
  */
 package org.jeasy.rules.api;
 
+import java.util.function.Consumer;
+
 /**
  * Abstraction for a rule that can be fired by the rules engine.
  *
@@ -30,7 +32,7 @@ package org.jeasy.rules.api;
  *
  * @author Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
  */
-public interface Rule extends Comparable<Rule> {
+public interface Rule extends Comparable<Rule>, Consumer<Facts> {
 
     /**
      * Default rule name.
@@ -73,10 +75,5 @@ public interface Rule extends Comparable<Rule> {
      */
     boolean evaluate(Facts facts);
 
-    /**
-     * Rule actions abstraction : this method encapsulates the rule's actions.
-     * @throws Exception thrown if an exception occurs during actions performing
-     */
-    void execute(Facts facts) throws Exception;
 
 }

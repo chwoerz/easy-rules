@@ -23,13 +23,15 @@
  */
 package org.jeasy.rules.core;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Condition;
+import org.jeasy.rules.api.Facts;
 import org.jeasy.rules.api.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +42,7 @@ public class RuleBuilderTest {
     @Mock
     private Condition condition;
     @Mock
-    private Action action1, action2;
+    private Consumer<Facts> action1, action2;
 
     @Test
     public void testDefaultRuleCreationWithDefaultValues() throws Exception {

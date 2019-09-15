@@ -23,13 +23,14 @@
  */
 package org.jeasy.rules.mvel;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Facts;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.ExpectedException;
 import org.mvel2.ParserContext;
+
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,13 +45,13 @@ public class MVELActionTest {
     @Test
     public void testMVELActionExecution() throws Exception {
         // given
-        Action markAsAdult = new MVELAction("person.setAdult(true);");
+        Consumer<Facts> markAsAdult = new MVELAction("person.setAdult(true);");
         Facts facts = new Facts();
         Person foo = new Person("foo", 20);
         facts.put("person", foo);
 
         // when
-        markAsAdult.execute(facts);
+        markAsAdult.accept(facts);
 
         // then
         assertThat(foo.isAdult()).isTrue();
@@ -59,11 +60,11 @@ public class MVELActionTest {
     @Test
     public void testMVELFunctionExecution() throws Exception {
         // given
-        Action printAction = new MVELAction("def hello() { System.out.println(\"Hello from MVEL!\"); }; hello();");
+        Consumer<Facts> printAction = new MVELAction("def hello() { System.out.println(\"Hello from MVEL!\"); }; hello();");
         Facts facts = new Facts();
 
         // when
-        printAction.execute(facts);
+        printAction.accept(facts);
 
         // then
         assertThat(systemOutRule.getLog()).contains("Hello from MVEL!");
@@ -74,13 +75,13 @@ public class MVELActionTest {
         // given
         expectedException.expect(Exception.class);
         expectedException.expectMessage("Error: unable to resolve method: org.jeasy.rules.mvel.Person.setBlah(java.lang.Boolean)");
-        Action action = new MVELAction("person.setBlah(true);");
+        Consumer<Facts> action = new MVELAction("person.setBlah(true);");
         Facts facts = new Facts();
         Person foo = new Person("foo", 20);
         facts.put("person", foo);
 
         // when
-        action.execute(facts);
+        action.accept(facts);
 
         // then
         // excepted exception
@@ -91,11 +92,11 @@ public class MVELActionTest {
         // given
         ParserContext context = new ParserContext();
         context.addPackageImport("java.util");
-        Action printAction = new MVELAction("def random() { System.out.println(\"Random from MVEL = \" + new java.util.Random(123).nextInt(10)); }; random();", context);
+        Consumer<Facts> printAction = new MVELAction("def random() { System.out.println(\"Random from MVEL = \" + new java.util.Random(123).nextInt(10)); }; random();", context);
         Facts facts = new Facts();
 
         // when
-        printAction.execute(facts);
+        printAction.accept(facts);
 
         // then
         assertThat(systemOutRule.getLog()).contains("Random from MVEL = 2");

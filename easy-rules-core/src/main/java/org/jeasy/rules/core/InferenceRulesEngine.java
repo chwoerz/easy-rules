@@ -77,9 +77,13 @@ public final class InferenceRulesEngine extends AbstractRuleEngine {
     }
 
     private Set<Rule> selectCandidates(Rules rules, Facts facts) {
-        return rules.asStream()
-                .filter(rule -> rule.evaluate(facts))
-                .collect(Collectors.toCollection(TreeSet::new));
+        Set<Rule> candidates = new TreeSet<>();
+        for (Rule rule : rules) {
+            if (rule.evaluate(facts)) {
+                candidates.add(rule);
+            }
+        }
+        return candidates;
     }
 
     @Override

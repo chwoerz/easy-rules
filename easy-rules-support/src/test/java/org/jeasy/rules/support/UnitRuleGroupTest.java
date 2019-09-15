@@ -85,8 +85,8 @@ public class UnitRuleGroupTest {
         rulesEngine.fire(rules, facts);
 
         // Then
-        verify(rule1).execute(facts);
-        verify(rule2).execute(facts);
+        verify(rule1).accept(facts);
+        verify(rule2).accept(facts);
     }
 
     @Test
@@ -108,9 +108,9 @@ public class UnitRuleGroupTest {
          */
 
         //Rule 1 should not be executed
-        verify(rule1, never()).execute(facts);
+        verify(rule1, never()).accept(facts);
         //Rule 2 should not be executed
-        verify(rule2, never()).execute(facts);
+        verify(rule2, never()).accept(facts);
     }
 
     @Test
@@ -127,11 +127,11 @@ public class UnitRuleGroupTest {
 
         // Then
         //Rule 1 should be executed
-        verify(rule1).execute(facts);
+        verify(rule1).accept(facts);
 
         //Rule 2 should not be evaluated nor executed
         verify(rule2, never()).evaluate(facts);
-        verify(rule2, never()).execute(facts);
+        verify(rule2, never()).accept(facts);
     }
 
     @Test

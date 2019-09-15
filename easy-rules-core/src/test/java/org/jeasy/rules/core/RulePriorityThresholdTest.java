@@ -54,9 +54,9 @@ public class RulePriorityThresholdTest extends AbstractTest {
 
         // Then
         //Rule 1 should be executed
-        verify(rule1).execute(facts);
+        verify(rule1).accept(facts);
         //Rule 2 should be skipped since its priority (2) exceeds priority threshold (1)
-        verify(rule2, never()).execute(facts);
+        verify(rule2, never()).accept(facts);
     }
 
 }

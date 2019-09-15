@@ -104,7 +104,7 @@ public class BasicRule implements Rule {
      * {@inheritDoc}
      */
     @Override
-    public void execute(Facts facts) throws Exception {
+    public void accept(Facts facts) {
         // no op
     }
 

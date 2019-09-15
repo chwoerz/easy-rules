@@ -23,7 +23,6 @@
  */
 package org.jeasy.rules.spel;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Condition;
 import org.jeasy.rules.api.Facts;
 import org.jeasy.rules.api.Rule;
@@ -32,6 +31,7 @@ import org.springframework.expression.ParserContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A {@link Rule} implementation that uses <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#expressions">SpEL</a> to evaluate and execute the rule.
@@ -41,7 +41,7 @@ import java.util.List;
 public class SpELRule extends BasicRule {
 
     private Condition condition = Condition.FALSE;
-    private List<Action> actions = new ArrayList<>();
+    private List<Consumer<Facts>> actions = new ArrayList<>();
 
     /**
      * Create a new SpEL rule.
@@ -131,9 +131,7 @@ public class SpELRule extends BasicRule {
     }
 
     @Override
-    public void execute(Facts facts) throws Exception {
-        for (Action action : actions) {
-            action.execute(facts);
-        }
+    public void accept(Facts facts) {
+        actions.forEach(action -> action.accept(facts));
     }
 }

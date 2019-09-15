@@ -50,20 +50,20 @@ public class SkipOnFirstAppliedRuleTest extends AbstractTest {
 
         // Then
         //Rule 1 should be executed
-        verify(rule1).execute(facts);
+        verify(rule1).accept(facts);
 
         //Rule 2 should be skipped since Rule 1 has been executed
-        verify(rule2, never()).execute(facts);
+        verify(rule2, never()).accept(facts);
     }
 
     @Test
-    public void testSkipOnFirstAppliedRuleWithException() throws Exception {
+    public void testSkipOnFirstAppliedRuleWithException() {
         // Given
         when(rule1.evaluate(facts)).thenReturn(true);
         when(rule2.evaluate(facts)).thenReturn(true);
         when(rule2.compareTo(rule1)).thenReturn(1);
-        final Exception exception = new Exception("fatal error!");
-        doThrow(exception).when(rule1).execute(facts);
+        final RuntimeException exception = new RuntimeException("fatal error!");
+        doThrow(exception).when(rule1).accept(facts);
 
         rules.register(rule1);
         rules.register(rule2);
@@ -72,7 +72,7 @@ public class SkipOnFirstAppliedRuleTest extends AbstractTest {
         rulesEngine.fire(rules, facts);
 
         //If an exception occurs when executing Rule 1, Rule 2 should still be applied
-        verify(rule2).execute(facts);
+        verify(rule2).accept(facts);
     }
 
 }

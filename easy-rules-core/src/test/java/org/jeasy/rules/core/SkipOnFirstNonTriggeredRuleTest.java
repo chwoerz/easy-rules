@@ -38,7 +38,7 @@ public class SkipOnFirstNonTriggeredRuleTest extends AbstractTest {
     }
 
     @Test
-    public void testSkipOnFirstNonTriggeredRule() throws Exception {
+    public void testSkipOnFirstNonTriggeredRule() {
         // Given
         when(rule1.evaluate(facts)).thenReturn(false);
         when(rule2.compareTo(rule1)).thenReturn(1);
@@ -51,9 +51,9 @@ public class SkipOnFirstNonTriggeredRuleTest extends AbstractTest {
 
         // Then
         //Rule1 is not triggered
-        verify(rule1, never()).execute(facts);
+        verify(rule1, never()).accept(facts);
         //Rule 2 should be skipped since Rule 1 has not been executed
-        verify(rule2, never()).execute(facts);
+        verify(rule2, never()).accept(facts);
     }
 
 }

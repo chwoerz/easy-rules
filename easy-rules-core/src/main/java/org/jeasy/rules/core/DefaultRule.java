@@ -23,18 +23,18 @@
  */
 package org.jeasy.rules.core;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Condition;
 import org.jeasy.rules.api.Facts;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 class DefaultRule extends BasicRule {
 
     private Condition condition;
-    private List<Action> actions;
+    private List<Consumer<Facts>> actions;
 
-    DefaultRule(String name, String description, int priority, Condition condition, List<Action> actions) {
+    DefaultRule(String name, String description, int priority, Condition condition, List<Consumer<Facts>> actions) {
         super(name, description, priority);
         this.condition = condition;
         this.actions = actions;
@@ -46,9 +46,9 @@ class DefaultRule extends BasicRule {
     }
 
     @Override
-    public void execute(Facts facts) throws Exception {
-        for (Action action : actions) {
-            action.execute(facts);
+    public void accept(Facts facts) {
+        for (Consumer<Facts> action : actions) {
+            action.accept(facts);
         }
     }
 

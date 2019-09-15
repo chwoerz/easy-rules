@@ -91,7 +91,7 @@ public class RuleProxy implements InvocationHandler {
                 return compareToMethod(args);
             case "evaluate":
                 return evaluateMethod(args);
-            case "execute":
+            case "accept":
                 return executeMethod(args);
             case "equals":
                 return equalsMethod(args);

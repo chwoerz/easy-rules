@@ -23,7 +23,6 @@
  */
 package org.jeasy.rules.spel;
 
-import org.jeasy.rules.api.Action;
 import org.jeasy.rules.api.Facts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +32,10 @@ import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import java.util.function.Consumer;
+
 /**
- * This class is an implementation of {@link Action} that uses <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#expressions">SpEL</a> to execute the action.
+ * This class uses <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#expressions">SpEL</a> to execute the action.
  *
  * Each fact is set as a variable in the {@link org.springframework.expression.EvaluationContext}.
  *
@@ -42,7 +43,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  *
  * @author Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
  */
-public class SpELAction implements Action {
+public class SpELAction implements Consumer<Facts> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpELAction.class);
 
@@ -73,7 +74,7 @@ public class SpELAction implements Action {
     }
 
     @Override
-    public void execute(Facts facts) {
+    public void accept(Facts facts) {
         try {
             StandardEvaluationContext context = new StandardEvaluationContext();
             context.setRootObject(facts.asMap());
@@ -84,4 +85,5 @@ public class SpELAction implements Action {
             throw e;
         }
     }
+
 }

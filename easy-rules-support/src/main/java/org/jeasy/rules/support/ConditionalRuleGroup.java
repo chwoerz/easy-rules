@@ -108,10 +108,10 @@ public class ConditionalRuleGroup extends CompositeRule {
      * @throws Exception thrown if an exception occurs during actions performing
      */
     @Override
-    public void execute(Facts facts) throws Exception {
-        conditionalRule.execute(facts);
+    public void accept(Facts facts) {
+        conditionalRule.accept(facts);
         for (Rule rule : sort(successfulEvaluations)) {
-            rule.execute(facts);
+            rule.accept(facts);
         }
     }
 

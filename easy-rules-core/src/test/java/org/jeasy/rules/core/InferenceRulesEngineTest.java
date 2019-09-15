@@ -52,7 +52,7 @@ public class InferenceRulesEngineTest {
     }
 
     @Test
-    public void testCandidateOrdering() throws Exception {
+    public void testCandidateOrdering() {
         // Given
         Facts facts = new Facts();
         facts.put("foo", true);

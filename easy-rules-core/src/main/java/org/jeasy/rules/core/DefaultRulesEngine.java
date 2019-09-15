@@ -85,7 +85,7 @@ public final class DefaultRulesEngine extends AbstractRuleEngine {
                 triggerListenersAfterEvaluate(rule, facts, true);
                 try {
                     triggerListenersBeforeExecute(rule, facts);
-                    rule.execute(facts);
+                    rule.accept(facts);
                     triggerListenersOnSuccess(rule, facts);
                     if (parameters.isSkipOnFirstAppliedRule()) {
                         LOGGER.debug("Next rules will be skipped since parameter skipOnFirstAppliedRule is set");

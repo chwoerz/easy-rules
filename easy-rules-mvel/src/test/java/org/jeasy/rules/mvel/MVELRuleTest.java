@@ -35,13 +35,13 @@ public class MVELRuleTest {
     private MVELRule mvelRule = new MVELRule().name("rn").description("rd").priority(1);
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mvelRule.when("person.age > 18");
         mvelRule.then("person.setAdult(true);");
     }
 
     @Test
-    public void whenTheRuleIsTriggered_thenConditionShouldBeEvaluated() throws Exception {
+    public void whenTheRuleIsTriggered_thenConditionShouldBeEvaluated() {
         // given
         facts.put("person", new Person("foo", 20));
 
@@ -53,13 +53,13 @@ public class MVELRuleTest {
     }
 
     @Test
-    public void whenTheConditionIsTrue_thenActionsShouldBeExecuted() throws Exception {
+    public void whenTheConditionIsTrue_thenActionsShouldBeExecuted() {
         // given
         Person foo = new Person("foo", 20);
         facts.put("person", foo);
 
         // when
-        mvelRule.execute(facts);
+        mvelRule.accept(facts);
 
         // then
         assertThat(foo.isAdult()).isTrue();
